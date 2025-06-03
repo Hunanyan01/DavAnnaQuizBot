@@ -174,6 +174,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Main
 def main():
+    env = os.getenv("ENV", "local")
+    webhook_url = os.getenv("WEBHOOK_URL")
+
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -190,8 +193,21 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), general_handler))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    print("DavAnnaQuizBot ✅ Աշխատում է։")
-    app.run_polling()
+    print("DavAnnaQuizBot ✅ Աշխատում է Render-ում։")
+
+    if env == "render":
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=int(os.environ.get("PORT", 8000)),
+            webhook_url=webhook_url
+        )
+    else:
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=int(os.environ.get("PORT", 8443)),
+            webhook_url=os.environ.get("WEBHOOK_URL")
+        )
+
 
 if __name__ == "__main__":
     main()
