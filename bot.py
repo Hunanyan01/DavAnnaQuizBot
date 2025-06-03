@@ -38,7 +38,8 @@ from utils import load_questions, load_progress, save_progress
 from telegram import Update
 from telegram.ext import ApplicationBuilder
 
-
+def main():
+    app = ApplicationBuilder().token(TOKEN).build()
 # Load/save helpers
 def load_questions():
     try:
@@ -73,6 +74,7 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     today = datetime.now().date().isoformat()
     questions = load_questions()
     progress = load_progress()
+    WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
     if user_id not in progress:
         progress[user_id] = {"answered": [], "xp_used": 0, "purchases": []}
@@ -111,6 +113,13 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("📦 Կոճակների keyboard =", keyboard)
     print("🎯 reply_markup =", reply_markup)
 
+    print("DavAnnaQuizBot ✅ Աշխատում է Render-ում։")
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000)),
+        url_path=TOKEN,
+        webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
+    )
     await send_timed_question(update, context, question, timeout=20, reply_markup=reply_markup)
 
 async def my_score(update: Update, context: ContextTypes.DEFAULT_TYPE):
